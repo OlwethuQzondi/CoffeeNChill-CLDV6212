@@ -1,0 +1,27 @@
+$kind: http-request
+name: Delete Menu Item
+method: DELETE
+url: '{{baseUrl}}/menu/{{createdCategory}}/{{createdSku}}'
+order: 5000
+pathVariables:
+  - key: category
+    value: '{{createdCategory}}'
+  - key: sku
+    value: '{{createdSku}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Test: Status code is 204 No Content
+      pm.test("Status code is 204 No Content", function () {
+          pm.response.to.have.status(204);
+      });
+
+      // Test: Response body is empty
+      pm.test("Response body is empty", function () {
+          pm.expect(pm.response.text()).to.be.empty;
+      });
+
+      // Clear environment variables after deletion
+      pm.environment.unset("createdCategory");
+      pm.environment.unset("createdSku");

@@ -1,0 +1,52 @@
+$kind: http-request
+name: Update Menu Item
+method: PUT
+url: '{{baseUrl}}/menu/{{createdCategory}}/{{createdSku}}'
+order: 4000
+headers:
+  - key: Content-Type
+    value: application/json
+pathVariables:
+  - key: category
+    value: '{{createdCategory}}'
+  - key: sku
+    value: '{{createdSku}}'
+body:
+  type: json
+  content: |-
+    {
+      "price": 3.00,
+      "isAvailable": true
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Test: Status code is 200 OK
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      // Test: Response is JSON
+      pm.test("Response is JSON", function () {
+          pm.response.to.be.json;
+      });
+
+      // Test: Price was updated correctly
+      pm.test("Price was updated to 3.00", function () {
+          const body = pm.response.json();
+          pm.expect(body.price).to.eql(3.00);
+      });
+
+      // Test: IsAvailable is still true
+      pm.test("IsAvailable is true", function () {
+          const body = pm.response.json();
+          pm.expect(body.isAvailable).to.be.true;
+      });
+
+      // Test: PartitionKey and RowKey are unchanged
+      pm.test("Category and Sku are unchanged", function () {
+          const body = pm.response.json();
+          pm.expect(body.partitionKey).to.eql(pm.environment.get("createdCategory"));
+          pm.expect(body.rowKey).to.eql(pm.environment.get("createdSku"));
+      });

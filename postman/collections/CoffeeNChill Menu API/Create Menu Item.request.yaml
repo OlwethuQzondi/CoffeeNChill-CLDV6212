@@ -1,0 +1,61 @@
+$kind: http-request
+name: Create Menu Item
+method: POST
+url: '{{baseUrl}}/menu'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "category": "Hot Drinks",
+      "sku": "COF-001",
+      "name": "Espresso",
+      "description": "A strong shot of espresso",
+      "price": 2.50,
+      "isAvailable": true
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Test: Status code is 201 Created
+      pm.test("Status code is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+
+      // Test: Response is JSON
+      pm.test("Response is JSON", function () {
+          pm.response.to.be.json;
+      });
+
+      // Test: Response contains PartitionKey and RowKey
+      pm.test("Response contains Category (PartitionKey) and Sku (RowKey)", function () {
+          const body = pm.response.json();
+          pm.expect(body).to.have.property("partitionKey");
+          pm.expect(body).to.have.property("rowKey");
+          pm.expect(body.partitionKey).to.eql("Hot Drinks");
+          pm.expect(body.rowKey).to.eql("COF-001");
+      });
+
+      // Test: Price and availability are correct
+      pm.test("Price and IsAvailable are set correctly", function () {
+          const body = pm.response.json();
+          pm.expect(body.price).to.eql(2.50);
+          pm.expect(body.isAvailable).to.be.true;
+      });
+
+      // Test: Name field is present
+      pm.test("Name field is present", function () {
+          const body = pm.response.json();
+          pm.expect(body.name).to.eql("Espresso");
+      });
+
+      // Save category and sku for use in later requests
+      if (pm.response.code === 201) {
+          const body = pm.response.json();
+          pm.environment.set("createdCategory", body.partitionKey);
+          pm.environment.set("createdSku", body.rowKey);
+      }

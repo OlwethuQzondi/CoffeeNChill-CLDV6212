@@ -1,0 +1,36 @@
+$kind: http-request
+name: Get Menu Items by Category
+method: GET
+url: '{{baseUrl}}/menu/category/{{createdCategory}}'
+order: 3000
+pathVariables:
+  - key: category
+    value: '{{createdCategory}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      // Test: Status code is 200 OK
+      pm.test("Status code is 200 OK", function () {
+          pm.response.to.have.status(200);
+      });
+
+      // Test: Response is a JSON array
+      pm.test("Response is a JSON array", function () {
+          const body = pm.response.json();
+          pm.expect(body).to.be.an("array");
+      });
+
+      // Test: All items belong to the requested category
+      pm.test("All items belong to the requested category", function () {
+          const body = pm.response.json();
+          const category = pm.environment.get("createdCategory");
+          body.forEach(function (item) {
+              pm.expect(item.partitionKey).to.eql(category);
+          });
+      });
+
+      // Test: Response time is acceptable
+      pm.test("Response time is less than 2000ms", function () {
+          pm.expect(pm.response.responseTime).to.be.below(2000);
+      });

@@ -1,0 +1,8 @@
+$kind: collection
+name: CoffeeNChill Menu API
+description: |-
+  API collection for the CoffeeNChill Azure Functions project.
+  Covers CRUD operations for menu items stored in Azure Table Storage.
+variables:
+  - key: baseUrl
+    value: 'http://localhost:7111/api'
