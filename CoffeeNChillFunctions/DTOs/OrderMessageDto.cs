@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace CoffeeNChillFunctions.DTOs
 {
     public class OrderMessageDto
     {
+        [JsonPropertyName("orderId")]
         public string OrderId { get; set; } = Guid.NewGuid().ToString();
+
+        [JsonPropertyName("customerName")]
         public string CustomerName { get; set; } = string.Empty;
+
+        [JsonPropertyName("coffeeItem")]
         public string CoffeeItem { get; set; } = string.Empty;
-        public int Quantity { get; set; }
-        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+
+        [JsonPropertyName("quantity")]
+        public int Quantity { get; set; } = 1;
     }
 }
