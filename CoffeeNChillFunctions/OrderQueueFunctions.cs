@@ -4,10 +4,8 @@ using Azure.Storage.Queues;
 using CoffeeNChillFunctions.DTOs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions
 {
@@ -54,7 +52,7 @@ namespace CoffeeNChillFunctions
             return response;
         }
 
-        [Function("ProcessOrderQueue")]
+        [Function("ProcessOrderQueueHandler")]
         public void ProcessOrder(
             [QueueTrigger(QueueName, Connection = "AzureWebJobsStorage")] string messageText)
         {
