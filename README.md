@@ -52,7 +52,7 @@
 <h2>🎥 Demonstration Video</h2>
 
 <ul>
-  <li><strong>YouTube Video:</strong> <a href="https://youtu.be/CxVYQOPW9Ms?si=7fD0Cy85pcETkDFZ">Watch the CoffeeNChill API Demonstration</a></li>
+  <li><strong>YouTube Video:</strong> <a href="https://https://youtu.be/JRBGDOSC4jA?si=yoLj0CWVoULwKA56">Watch the CoffeeNChill API Demonstration</a></li>
 </ul>
 
 <p><strong>The demonstration video covers:</strong></p>
