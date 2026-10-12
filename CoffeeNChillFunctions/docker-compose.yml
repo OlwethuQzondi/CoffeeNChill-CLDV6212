@@ -4,8 +4,6 @@
 # [2] Microsoft, "Azurite emulator for local Azure Storage development," Microsoft Learn, 2024.
 #     Available: https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite
 
-version: '3.8'
-
 services:
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:latest
@@ -18,7 +16,8 @@ services:
       - coffeenchill-net
 
   functions:
-    image: <your_dockerhub_username>/coffeenchill-functions:v2.0
+    build: .
+    image: zondirite/coffeenchill-functions:v2.0
     container_name: coffeenchill-app
     ports:
       - "7111:80"
