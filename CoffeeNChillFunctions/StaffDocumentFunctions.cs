@@ -1,150 +1,149 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using CoffeeNChillFunctions.DTOs;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.Logging;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using CoffeeNChillFunctions.DTOs;
 
 namespace CoffeeNChillFunctions
 {
     public class StaffDocumentFunctions
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<StaffDocumentFunctions> _logger;
         private const string ContainerName = "staff-docs";
-        private const string ConnectionStringSetting = "AzureWebJobsStorage";
 
-        public StaffDocumentFunctions(ILoggerFactory loggerFactory)
+        public StaffDocumentFunctions(ILogger<StaffDocumentFunctions> logger)
         {
-            _logger = loggerFactory.CreateLogger<StaffDocumentFunctions>();
+            _logger = logger;
         }
 
-        private BlobContainerClient GetBlobContainerClient()
+        private async Task<BlobContainerClient> GetContainerClientAsync()
         {
-            string connectionString = Environment.GetEnvironmentVariable(ConnectionStringSetting)
-                ?? "UseDevelopmentStorage=true";
-            var containerClient = new BlobContainerClient(connectionString, ContainerName);
-            containerClient.CreateIfNotExists();
+            string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage") ?? "UseDevelopmentStorage=true";
+            var serviceClient = new BlobServiceClient(connectionString);
+            var containerClient = serviceClient.GetBlobContainerClient(ContainerName);
+            await containerClient.CreateIfNotExistsAsync();
             return containerClient;
         }
 
-        // 1. POST /api/documents/upload - Upload Staff Document
         [Function("UploadStaffDocument")]
-        public async Task<HttpResponseData> UploadStaffDocument(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "documents/upload")] HttpRequestData req)
+        public async Task<IActionResult> UploadStaffDocument(
+     [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "documents/upload")] HttpRequest req)
         {
             _logger.LogInformation("Processing staff document upload request.");
 
+            if (req == null)
+            {
+                return new BadRequestObjectResult(new { error = "Request is null." });
+            }
+
+            string fileName = req.Query["fileName"].ToString();
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = $"doc_{Guid.NewGuid():N}.dat";
+            }
+
             try
             {
-                var containerClient = GetBlobContainerClient();
-
-                // Read header or query parameter for file name
-                string fileName = req.Headers.Contains("X-File-Name")
-                    ? string.Join("", req.Headers.GetValues("X-File-Name"))
-                    : $"doc_{Guid.NewGuid():N}.pdf";
-
-                var blobClient = containerClient.GetBlobClient(fileName);
-
-                using (var stream = req.Body)
+                using (var ms = new MemoryStream())
                 {
-                    await blobClient.UploadAsync(stream, overwrite: true);
+                    await req.Body.CopyToAsync(ms);
+
+                    if (ms.Length == 0)
+                    {
+                        return new BadRequestObjectResult(new { error = "Request body stream is empty." });
+                    }
+
+                    ms.Position = 0;
+
+                    var containerClient = await GetContainerClientAsync();
+                    var blobClient = containerClient.GetBlobClient(fileName);
+
+                    await blobClient.UploadAsync(ms, overwrite: true);
+
+                    var dto = new StaffDocumentDto
+                    {
+                        FileName = fileName,
+                        SizeInBytes = ms.Length,
+                        ContentType = req.ContentType ?? "application/octet-stream",
+                        LastModified = DateTimeOffset.UtcNow
+                    };
+
+                    return new OkObjectResult(dto);
                 }
-
-                var response = req.CreateResponse(HttpStatusCode.Created);
-                await response.WriteAsJsonAsync(new
-                {
-                    message = "File uploaded successfully to staff-docs.",
-                    fileName = fileName,
-                    blobUri = blobClient.Uri.ToString()
-                });
-                return response;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error uploading staff document.");
-                var response = req.CreateResponse(HttpStatusCode.InternalServerError);
-                await response.WriteStringAsync($"Error: {ex.Message}");
-                return response;
+                _logger.LogError(ex, "Error uploading document to Blob storage.");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
 
-        // 2. GET /api/documents - List All Staff Documents
         [Function("ListStaffDocuments")]
-        public async Task<HttpResponseData> ListStaffDocuments(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "documents")] HttpRequestData req)
+        public async Task<IActionResult> ListStaffDocuments(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "documents")] HttpRequest req)
         {
-            _logger.LogInformation("Retrieving all staff documents.");
+            _logger.LogInformation("Fetching staff document list.");
 
             try
             {
-                var containerClient = GetBlobContainerClient();
-                var documentList = new List<StaffDocumentDto>();
+                var containerClient = await GetContainerClientAsync();
+                var documents = new List<StaffDocumentDto>();
 
-                await foreach (BlobItem blobItem in containerClient.GetBlobsAsync())
+                await foreach (BlobItem blob in containerClient.GetBlobsAsync())
                 {
-                    documentList.Add(new StaffDocumentDto
+                    documents.Add(new StaffDocumentDto
                     {
-                        FileName = blobItem.Name,
-                        SizeInBytes = blobItem.Properties.ContentLength ?? 0,
-                        ContentType = blobItem.Properties.ContentType ?? "application/octet-stream",
-                        LastModified = blobItem.Properties.LastModified
+                        FileName = blob.Name,
+                        SizeInBytes = blob.Properties.ContentLength ?? 0,
+                        ContentType = blob.Properties.ContentType ?? "application/octet-stream",
+                        LastModified = blob.Properties.LastModified
                     });
                 }
 
-                var response = req.CreateResponse(HttpStatusCode.OK);
-                await response.WriteAsJsonAsync(documentList);
-                return response;
+                return new OkObjectResult(documents);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error listing staff documents.");
-                var response = req.CreateResponse(HttpStatusCode.InternalServerError);
-                await response.WriteStringAsync($"Error: {ex.Message}");
-                return response;
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
 
-        // 3. GET /api/documents/download/{fileName} - Download Staff Document
         [Function("DownloadStaffDocument")]
-        public async Task<HttpResponseData> DownloadStaffDocument(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "documents/download/{fileName}")] HttpRequestData req,
+        public async Task<IActionResult> DownloadStaffDocument(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "documents/download/{fileName}")] HttpRequest req,
             string fileName)
         {
-            _logger.LogInformation("Streaming download for document: {FileName}", fileName);
+            _logger.LogInformation("Downloading document: {FileName}", fileName);
 
             try
             {
-                var containerClient = GetBlobContainerClient();
+                var containerClient = await GetContainerClientAsync();
                 var blobClient = containerClient.GetBlobClient(fileName);
 
                 if (!await blobClient.ExistsAsync())
                 {
-                    var notFoundResponse = req.CreateResponse(HttpStatusCode.NotFound);
-                    await notFoundResponse.WriteStringAsync($"Document '{fileName}' was not found.");
-                    return notFoundResponse;
+                    return new NotFoundObjectResult(new { error = "Document not found." });
                 }
 
-                var downloadInfo = await blobClient.DownloadStreamingAsync();
+                var stream = await blobClient.OpenReadAsync();
+                var properties = await blobClient.GetPropertiesAsync();
 
-                var response = req.CreateResponse(HttpStatusCode.OK);
-                response.Headers.Add("Content-Type", downloadInfo.Value.Details.ContentType ?? "application/octet-stream");
-                response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fileName}\"");
-
-                await downloadInfo.Value.Content.CopyToAsync(response.Body);
-                return response;
+                return new FileStreamResult(stream, properties.Value.ContentType ?? "application/octet-stream")
+                {
+                    FileDownloadName = fileName
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error downloading staff document.");
-                var response = req.CreateResponse(HttpStatusCode.InternalServerError);
-                await response.WriteStringAsync($"Error: {ex.Message}");
-                return response;
+                _logger.LogError(ex, "Error downloading document {FileName}.", fileName);
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
     }

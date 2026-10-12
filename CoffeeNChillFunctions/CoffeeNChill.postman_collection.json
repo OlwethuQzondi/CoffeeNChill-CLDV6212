@@ -1,0 +1,122 @@
+﻿{
+  "info": {
+    "name": "CoffeeNChill Canteen API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7071/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Menu Management",
+      "item": [
+        {
+          "name": "Create Menu Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"category\": \"Hot Drinks\",\n    \"sku\": \"COF-001\",\n    \"name\": \"Espresso\",\n    \"description\": \"Rich double shot espresso\",\n    \"price\": 25.00,\n    \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "menu" ]
+            }
+          }
+        },
+        {
+          "name": "Get All Menu Items",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/menu",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "menu" ]
+            }
+          }
+        },
+        {
+          "name": "Get Menu Items By Category",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/menu/category/Hot Drinks",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "menu", "category", "Hot Drinks" ]
+            }
+          }
+        },
+        {
+          "name": "Update Menu Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"price\": 28.00,\n    \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot Drinks/COF-001",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "menu", "Hot Drinks", "COF-001" ]
+            }
+          }
+        },
+        {
+          "name": "Delete Menu Item",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/menu/Hot Drinks/COF-001",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "menu", "Hot Drinks", "COF-001" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Staff Documents",
+      "item": [
+        {
+          "name": "List Staff Documents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "documents" ]
+            }
+          }
+        },
+        {
+          "name": "Download Staff Document",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/documents/download/recipe-guide.pdf",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "documents", "download", "recipe-guide.pdf" ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
