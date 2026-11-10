@@ -1,4 +1,3 @@
-
 <h1>CoffeeNChill Azure Functions API</h1>
 
 <p>A serverless RESTful API built with .NET 8 (Isolated Worker Process) and Azure Functions v4, integrated with Azure Table Storage, Azure Queue Storage, and Azure Blob Storage to manage coffee shop operations, including menu items, order lifecycles, and staff documents. The application is containerized with Docker and Docker Compose for standalone execution.</p>
@@ -8,16 +7,6 @@
 <h2>📌 Project Architecture Overview</h2>
 
 <pre><code>CoffeeNChillFunctions/
-# CoffeeNChill Azure Functions API
-
-A serverless RESTful API built with .NET 8 (Isolated Worker Process) and Azure Functions v4, integrated with Azure Table Storage, Azure Queue Storage, and Azure Blob Storage to manage coffee shop operations, including menu items, order lifecycles, and staff documents. The application is containerized with Docker and Docker Compose for standalone execution.
-
----
-
-## 📌 Project Architecture Overview
-
-```text
-CoffeeNChillFunctions/
 ├── docs/                                   # Exported Postman collection and artifacts
 │   └── CoffeeNChill.postman_collection.json
 ├── DTOs/                                   # Data Transfer Objects with JsonPropertyName
@@ -34,6 +23,8 @@ CoffeeNChillFunctions/
 ├── host.json                               # Azure Functions host runtime configuration
 ├── local.settings.json                     # Connection strings for local development
 └── README.md                               # Main documentation
+</code></pre>
+
 <h2>👥 Group Member Contributions</h2>
 
 <table>
@@ -61,7 +52,7 @@ CoffeeNChillFunctions/
 <h2>🎥 Demonstration Video</h2>
 
 <ul>
-  <li><strong>YouTube Video:</strong> <a href="[https://https://youtu.be/JRBGDOSC4jA?si=yoLj0CWVoULwKA56](https://youtu.be/JRBGDOSC4jA?si=yoLj0CWVoULwKA56)">Watch the CoffeeNChill API Demonstration</a></li>
+  <li><strong>YouTube Video:</strong> <a href="https://youtu.be/hNR58d5_YXo?si=YKvw6rlfvdZA-XDZ">Watch the CoffeeNChill API Demonstration</a></li>
 </ul>
 
 <p><strong>The demonstration video covers:</strong></p>
