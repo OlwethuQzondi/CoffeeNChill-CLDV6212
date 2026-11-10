@@ -1,4 +1,5 @@
 <Solution>
   <Folder Name="/Solution Items/" />
+  <Project Path="CoffeeNChill.Gateway/CoffeeNChill.Gateway.csproj" />
   <Project Path="CoffeeNChillFunctions/CoffeeNChillFunctions.csproj" />
 </Solution>
