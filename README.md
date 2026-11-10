@@ -8,23 +8,32 @@
 <h2>📌 Project Architecture Overview</h2>
 
 <pre><code>CoffeeNChillFunctions/
-├── docs/                                  # Exported Postman collection and artifacts
-│   └── CoffeeNChill.postman_collection.json
-├── DTOs/                                  # Data Transfer Objects with JsonPropertyName
-│   ├── MenuItemDto.cs
-│   └── OrderMessageDto.cs                 # Part 2: Order payload DTO with JSON attributes
-├── Models/                                # Table Storage Entity classes
-│   ├── MenuItemEntity.cs
-│   └── OrderEntity.cs                     # Part 2: Order Table entity mapping
-├── MenuFunctions.cs                       # Azure Functions: Table Storage (Menu CRUD)
-├── OrderQueueFunctions.cs                 # Part 2: Table Storage & Base64 Queue Integration
-├── StaffDocumentFunctions.cs              # Azure Functions: Blob Storage (Staff Docs)
-├── Dockerfile                             # Multi-stage Docker build setup
-├── docker-compose.yml                     # Multi-container orchestration (App + Azurite)
-├── host.json                              # Azure Functions host runtime configuration
-├── local.settings.json                    # Connection strings for local development
-└── README.md                              # Main documentation</code></pre>
+# CoffeeNChill Azure Functions API
 
+A serverless RESTful API built with .NET 8 (Isolated Worker Process) and Azure Functions v4, integrated with Azure Table Storage, Azure Queue Storage, and Azure Blob Storage to manage coffee shop operations, including menu items, order lifecycles, and staff documents. The application is containerized with Docker and Docker Compose for standalone execution.
+
+---
+
+## 📌 Project Architecture Overview
+
+```text
+CoffeeNChillFunctions/
+├── docs/                                   # Exported Postman collection and artifacts
+│   └── CoffeeNChill.postman_collection.json
+├── DTOs/                                   # Data Transfer Objects with JsonPropertyName
+│   ├── MenuItemDto.cs
+│   └── OrderMessageDto.cs                  # Part 2: Order payload DTO with JSON attributes
+├── Models/                                 # Table Storage Entity classes
+│   ├── MenuItemEntity.cs
+│   └── OrderEntity.cs                      # Part 2: Order Table entity mapping
+├── MenuFunctions.cs                        # Azure Functions: Table Storage (Menu CRUD)
+├── OrderQueueFunctions.cs                  # Part 2: Table Storage & Base64 Queue Integration
+├── StaffDocumentFunctions.cs               # Azure Functions: Blob Storage (Staff Docs)
+├── Dockerfile                              # Multi-stage Docker build setup
+├── docker-compose.yml                      # Multi-container orchestration (App + Azurite)
+├── host.json                               # Azure Functions host runtime configuration
+├── local.settings.json                     # Connection strings for local development
+└── README.md                               # Main documentation
 <h2>👥 Group Member Contributions</h2>
 
 <table>
